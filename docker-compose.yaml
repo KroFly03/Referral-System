@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  server:
+    container_name: referral_system_server
+    build: ./backend
+    env_file:
+      - ./backend/.env
+    environment:
+      - POSTGRES_HOST=db
+    ports:
+      - "8080:8080"
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+
+  migrations:
+    container_name: referral_system_migrations
+    build: ./backend
+    env_file:
+      - ./backend/.env
+    environment:
+      - POSTGRES_HOST=db
+    depends_on:
+      db:
+        condition: service_healthy
+    command: python manage.py migrate
+
+  db:
+    container_name: referral_system_db
+    image: postgres:15.2
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./backend/.env
+    healthcheck:
+      test: pg_isready -U admin -d referral_system
+      interval: 3s
+      retries: 10
+      timeout: 3s
+    volumes:
+      - pg_data:/var/lib/postgresql/data/
+volumes:
+  pg_data:
