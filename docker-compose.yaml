@@ -9,7 +9,7 @@ services:
     environment:
       - POSTGRES_HOST=db
     ports:
-      - "8080:8080"
+      - "8000:8000"
     depends_on:
       migrations:
         condition: service_completed_successfully
